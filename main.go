@@ -10,6 +10,10 @@ import (
 	"text/template"
 
 	"github.com/Mannaka/learning-go/trace"
+	"github.com/stretchr/gomniauth"
+	"github.com/stretchr/gomniauth/providers/facebook"
+	"github.com/stretchr/gomniauth/providers/github"
+	"github.com/stretchr/gomniauth/providers/google"
 )
 
 // temp1は一つのテンプレートをさす
@@ -33,6 +37,13 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func main() {
 	var addr = flag.String("addr", ":8080", "アプリケーションのアドレス")
 	flag.Parse() // フラグを解釈
+	// Gomniauthのセットアップ
+	gomniauth.SetSecurityKey("セキュリティキー")
+	gomniauth.WithProviders(
+		facebook.New("クライアントID", "秘密の値", "http://localhost:8080/auth/callback/facebook"),
+		github.New("クライアントID", "秘密の値", "http://localhost:8080/auth/callback/github"),
+		google.New("クライアントID", "秘密の値", "http://localhost:8080/auth/callback/google"),
+	)
 	r := newRoom()
 	// if you want traceOff, you must comment this line out.
 	r.tracer = trace.New(os.Stdout)
