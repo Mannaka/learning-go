@@ -1,14 +1,15 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"sync"
 	"text/template"
-	"flag"
+
 	"github.com/Mannaka/learning-go/trace"
-	"os"
 )
 
 // temp1は一つのテンプレートをさす
@@ -33,15 +34,19 @@ func main() {
 	var addr = flag.String("addr", ":8080", "アプリケーションのアドレス")
 	flag.Parse() // フラグを解釈
 	r := newRoom()
-	// if you want traceOff, you must comment this line out. 
+	// if you want traceOff, you must comment this line out.
 	r.tracer = trace.New(os.Stdout)
-    http.Handle("/", &templateHandler{filename: "chat.html"})
-    http.Handle("/room", r)
-    // チャットルームを開始します
-    go r.run()
+	// 課題　localのbootstrapを適用させる
+	// http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(http.Dir("assets"))))
+	http.Handle("/chat", MustAuth(&templateHandler{filename: "chat.html"}))
+	http.Handle("/login", &templateHandler{filename: "login.html"})
+	http.HandleFunc("/auth/", loginHandler)
+	http.Handle("/room", r)
+	// チャットルームを開始します
+	go r.run()
 	log.Println("Webサーバーを開始します。ポート：", *addr)
 	// webサーバーを起動します
-    if err := http.ListenAndServe(":8080", nil); err != nil {
-        log.Fatal("ListenAndServe", err)
-    }
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Fatal("ListenAndServe", err)
+	}
 }
