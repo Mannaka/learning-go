@@ -33,6 +33,7 @@ func main() {
 	var addr = flag.String("addr", ":8080", "アプリケーションのアドレス")
 	flag.Parse() // フラグを解釈
 	r := newRoom()
+	// if you want traceOff, you must comment this line out. 
 	r.tracer = trace.New(os.Stdout)
     http.Handle("/", &templateHandler{filename: "chat.html"})
     http.Handle("/room", r)

@@ -3,8 +3,9 @@ package main
 import (
 	"log"
 	"net/http"
-	"github.com/gorilla/websocket"
+
 	"github.com/Mannaka/learning-go/trace"
+	"github.com/gorilla/websocket"
 )
 
 type room struct {
@@ -81,5 +82,6 @@ func newRoom() *room {
 		join:    make(chan *client),
 		leave:   make(chan *client),
 		clients: make(map[*client]bool),
+		tracer:  trace.Off(),
 	}
 }
