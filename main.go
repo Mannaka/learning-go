@@ -44,16 +44,17 @@ func main() {
 	var addr = flag.String("addr", ":8080", "アプリケーションのアドレス")
 	flag.Parse() // フラグを解釈
 	// Gomniauthのセットアップ
-	gomniauth.SetSecurityKey("kawazukawazu")
+	// TODO: セキュリティキー、クライアントID、秘密鍵を環境変数から読み込ませる
+	gomniauth.SetSecurityKey(os.Getenv("SEQ_KEY_FOR_CHAT"))
 	gomniauth.WithProviders(
 		facebook.New("クライアントID", "秘密の値", "http://localhost:8080/auth/callback/facebook"),
 		github.New("クライアントID", "秘密の値", "http://localhost:8080/auth/callback/github"),
-		google.New("764495996051-c0epal7tc9jk7065pv1eiigm4a2m6n4m.apps.googleusercontent.com", "WSWCzCdzHy4THv3dl1TEyQ0S", "http://localhost:8080/auth/callback/google"),
+		google.New(os.Getenv("CLIENT_FOR_CHAT"), os.Getenv("KEY_FOR_CHAT"), "http://localhost:8080/auth/callback/google"),
 	)
 	r := newRoom()
 	// if you want traceOff, you must comment this line out.
 	r.tracer = trace.New(os.Stdout)
-	// 課題　localのbootstrapを適用させる
+	// TODO:　localのbootstrapを適用させる
 	// http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(http.Dir("assets"))))
 	http.Handle("/chat", MustAuth(&templateHandler{filename: "chat.html"}))
 	http.Handle("/login", &templateHandler{filename: "login.html"})
