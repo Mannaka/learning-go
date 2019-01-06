@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/gomniauth/providers/facebook"
 	"github.com/stretchr/gomniauth/providers/github"
 	"github.com/stretchr/gomniauth/providers/google"
+	"github.com/stretchr/objx"
 )
 
 // temp1は一つのテンプレートをさす
@@ -21,7 +22,6 @@ type templateHandler struct {
 	once     sync.Once
 	filename string
 	temp1    *template.Template
-	trace    trace.Tracer
 }
 
 // ServeHTTPはHTTPリクエストを処理
@@ -31,18 +31,24 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			template.Must(template.ParseFiles(filepath.Join("templates",
 				t.filename)))
 	})
-	t.temp1.Execute(w, r)
+	data := map[string]interface{}{
+		"Host": r.Host,
+	}
+	if authCookie, err := r.Cookie("auth"); err == nil {
+		data["UserData"] = objx.MustFromBase64(authCookie.Value)
+	}
+	t.temp1.Execute(w, data)
 }
 
 func main() {
 	var addr = flag.String("addr", ":8080", "アプリケーションのアドレス")
 	flag.Parse() // フラグを解釈
 	// Gomniauthのセットアップ
-	gomniauth.SetSecurityKey("セキュリティキー")
+	gomniauth.SetSecurityKey("kawazukawazu")
 	gomniauth.WithProviders(
 		facebook.New("クライアントID", "秘密の値", "http://localhost:8080/auth/callback/facebook"),
 		github.New("クライアントID", "秘密の値", "http://localhost:8080/auth/callback/github"),
-		google.New("クライアントID", "秘密の値", "http://localhost:8080/auth/callback/google"),
+		google.New("764495996051-c0epal7tc9jk7065pv1eiigm4a2m6n4m.apps.googleusercontent.com", "WSWCzCdzHy4THv3dl1TEyQ0S", "http://localhost:8080/auth/callback/google"),
 	)
 	r := newRoom()
 	// if you want traceOff, you must comment this line out.
@@ -57,7 +63,7 @@ func main() {
 	go r.run()
 	log.Println("Webサーバーを開始します。ポート：", *addr)
 	// webサーバーを起動します
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatal("ListenAndServe", err)
+	if err := http.ListenAndServe(*addr, nil); err != nil {
+		log.Fatal("ListenAndServe:", err)
 	}
 }
