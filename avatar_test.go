@@ -20,3 +20,18 @@ func TestAuthAvatar(t *testing.T) {
 		}
 	}
 }
+
+func TestGravatarAvatar(t *testing.T) {
+	var gravatarAvatar GravatarAvatar
+	client := new(client)
+	client.userData =
+		map[string]interface{}{"email": "MyEmailAdress@co.jp"}
+	url, err := gravatarAvatar.GetAvatarURL(client)
+	if err != nil {
+		t.Error("GravatarAvatar.GetAvatarURLはエラーを返すべきではありません")
+	}
+	if url !=
+		"//www.gravatar.com/avatar/5090d61a68ff8978dce32cf94338c54c" {
+			t.Errorf("GravatarAvatar.GetAvatarURLが%sという誤った値を返しました", url)
+		}
+}

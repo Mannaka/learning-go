@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/stretchr/objx"
 	"log"
 	"net/http"
+
+	"github.com/stretchr/objx"
 
 	"github.com/Mannaka/learning-go/trace"
 	"github.com/gorilla/websocket"
@@ -20,6 +21,8 @@ type room struct {
 	clients map[*client]bool
 	// tracerはチャットルーム上で行われた操作のログを受け取ります
 	tracer trace.Tracer
+	// avatarはアバターの情報を取得します
+	avatar Avatar
 }
 
 func (r *room) run() {
@@ -72,9 +75,9 @@ func (r *room) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	client := &client{
-		socket: socket,
-		send: make(chan *message, messageBufferSize),
-		room: r,
+		socket:   socket,
+		send:     make(chan *message, messageBufferSize),
+		room:     r,
 		userData: objx.MustFromBase64(authCookie.Value),
 	}
 	r.join <- client
@@ -84,12 +87,13 @@ func (r *room) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 // すぐに利用できるチャットルームを生成して返します
-func newRoom() *room {
+func newRoom(avatar Avatar) *room {
 	return &room{
 		forward: make(chan *message),
 		join:    make(chan *client),
 		leave:   make(chan *client),
 		clients: make(map[*client]bool),
 		tracer:  trace.Off(),
+		avatar: avatar,
 	}
 }

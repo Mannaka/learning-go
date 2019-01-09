@@ -51,7 +51,7 @@ func main() {
 		github.New("クライアントID", "秘密の値", "http://localhost:8080/auth/callback/github"),
 		google.New(os.Getenv("CLIENT_FOR_CHAT"), os.Getenv("KEY_FOR_CHAT"), "http://localhost:8080/auth/callback/google"),
 	)
-	r := newRoom()
+	r := newRoom(UseGravatar)
 	// if you want traceOff, you must comment this line out.
 	r.tracer = trace.New(os.Stdout)
 	// TODO:　localのbootstrapを適用させる
